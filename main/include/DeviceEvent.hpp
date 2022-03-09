@@ -10,9 +10,17 @@ namespace listener
     struct DeviceEvent
     {
         uint16_t device_id;
+        uint8_t event_id;
         time_t event_timestamp;
         bool has_moved;
         bool has_opened;
+        bool has_light;
+        float xAccel;
+        float yAccel;
+        float zAccel;
+        float ldrOne;
+        float ldrTwo;
+        float ldrThree;
     };
 
 };

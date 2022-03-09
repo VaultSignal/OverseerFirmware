@@ -9,7 +9,8 @@ void watcher::WatcherController::blinkBuiltinLED(time_t seconds_on, time_t secon
     delay((uint32_t)seconds_off);
 }
 
-void watcher::WatcherController::initialiseWatcher(void)
+void watcher::WatcherController::initialiseWatcher()
 {
+    Serial.begin(115200);
     pinMode(BUILTIN_LED_PIN, OUTPUT);
 }

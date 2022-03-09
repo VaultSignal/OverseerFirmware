@@ -4,20 +4,20 @@
 watcher::NetworkClient::NetworkClient(const char *ssid, const char *password)
 {
     // Initialise the connection.
-    this->eventsQueue = xQueueCreate(NETWORK_EVENT_QUEUE_LIMIT, sizeof(DeviceEvent));
+    this->eventsQueue = xQueueCreate(NETWORK_EVENT_QUEUE_LIMIT, sizeof(listener::DeviceEvent));
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED)
     {
         WatcherController::blinkBuiltinLED(250, 250);
     }
-    Serial.printf("WiFi Connected, IP Address:");
-    Serial.print(WiFi.localIP());
+    Serial.println("WiFi Connected, IP Address:");
+    Serial.println(WiFi.localIP());
 }
 
 void watcher::NetworkClient::queueForUpload(const listener::DeviceEvent &event)
 {
     // Try to queue the event, if the queue fails, the package is 'dropped'.
-    xQueueSend(this->eventsQueue, event, 0);
+    xQueueSend(this->eventsQueue, &event, 0);
 }
 
 void watcher::NetworkClient::postToServer(const listener::DeviceEvent &event)
@@ -40,7 +40,7 @@ void watcher::NetworkClient::sendEvents(void)
         }
         else
         {
-            this->postToServer(&currentEvent);
+            this->postToServer(currentEvent);
         }
     }
 }
