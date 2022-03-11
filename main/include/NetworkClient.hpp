@@ -5,26 +5,37 @@
 #include "WiFi.h"
 #include "DeviceEvent.hpp"
 #include <memory>
+#include "esp_websocket_client.h"
 
 /**
  * @brief Maximum number of events that can be queued.
  */
 const int NETWORK_EVENT_QUEUE_LIMIT = 20;
+constexpr const char *HOST = "ws://192.168.1.3:8000/";
+static constexpr esp_websocket_client_config_t WS_CONFIG = {
+    .uri = HOST,
+};
 
-namespace watcher
+namespace VaultSignal
 {
     class NetworkClient
     {
     private:
         QueueHandle_t eventsQueue;
-        std::unique_ptr<WiFiClient> client;
+        esp_websocket_client_handle_t client;
 
         /**
          * @brief Post a single event to the server.
          *
          * @param event Event to be posted.
          */
-        void postToServer(const listener::DeviceEvent &event);
+        void postToServer(const DeviceEvent &event);
+
+        /**
+         * @brief Connect to the websocket server.
+         *
+         */
+        void connectClient(void);
 
     public:
         /**
@@ -48,7 +59,7 @@ namespace watcher
          *  when the time permits.
          * @param event Event to upload.
          */
-        void queueForUpload(const listener::DeviceEvent &event);
+        void queueForUpload(const DeviceEvent &event);
 
         /**
          * @brief Sends device events to the server.

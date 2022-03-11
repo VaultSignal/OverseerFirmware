@@ -4,7 +4,7 @@
 
 const int BUILTIN_LED_PIN = 33;
 
-namespace watcher
+namespace VaultSignal
 {
     class WatcherController
     {
@@ -22,6 +22,7 @@ namespace watcher
          * Initialise the watcher device's state.
          */
         static void initialiseWatcher(void);
+        static uint8_t deviceID;
     };
 
 };

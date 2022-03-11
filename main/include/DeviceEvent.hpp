@@ -1,7 +1,7 @@
 #ifndef DEVICE_PAYLOAD_HPP
 #define DEVICE_PAYLOAD_HPP
 
-namespace listener
+namespace VaultSignal
 {
     /**
      * @brief Represents an event emitted from a device in the
@@ -9,12 +9,12 @@ namespace listener
      */
     struct DeviceEvent
     {
-        uint16_t device_id;
-        uint8_t event_id;
-        time_t event_timestamp;
-        bool has_moved;
-        bool has_opened;
-        bool has_light;
+        uint16_t deviceID;
+        uint8_t eventID;
+        time_t eventTimestamp;
+        bool hasMoved;
+        bool hasOpened;
+        bool hasLight;
         float xAccel;
         float yAccel;
         float zAccel;

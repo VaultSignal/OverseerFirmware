@@ -2,7 +2,7 @@
 #define RADIO_RECEIVER_HPP
 #include <memory>
 
-namespace watcher
+namespace VaultSignal
 {
     class RadioReceiver
     {
@@ -10,7 +10,7 @@ namespace watcher
         static std::unique_ptr<DeviceEvent> encodeDeviceEvent(uint8_t *payload);
 
     public:
-        static void receiveMessages(NetworkClient client);
+        void receiveMessages(NetworkClient client);
     }
 };
 
