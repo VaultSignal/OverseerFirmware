@@ -4,7 +4,6 @@
 #include "esp_log.h"
 #include "esp_websocket_client.h"
 #include <ctime>
-static const char *TAG = "WEBSOCKET";
 static const int NO_DATA_TIMEOUT = 10;
 
 VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password)
@@ -17,11 +16,12 @@ VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password
     while (WiFi.status() != WL_CONNECTED)
     {
         ESP_LOGW(TAG, "Connection Failed...");
-        delay(250);
+        WatcherController::blinkLED(125, 125, LedPin::WIFI_PIN);
     }
     ESP_LOGI(TAG, "WiFi Connected.");
+    WatcherController::setLEDState(LedPin::WIFI_PIN, LedState::ON);
     this->client = esp_websocket_client_init(&WS_CONFIG);
-    ESP_LOGI(TAG, "Websocket Client Connected");
+    ESP_LOGI(TAG, "Websocket Client is Initialised");
 }
 
 VaultSignal::NetworkClient::~NetworkClient()
@@ -38,6 +38,7 @@ void VaultSignal::NetworkClient::queueForUpload(const DeviceEvent &event)
 
 void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
 {
+    ESP_LOGI(TAG, "Sending event.");
     std::time_t currentTime = std::time(0);
     static char data[10000];
     int len = sprintf(data, "{\"station_id\": \"%X\","
@@ -63,17 +64,23 @@ void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
 
 void VaultSignal::NetworkClient::connectClient(void)
 {
+    ESP_LOGI(TAG, "Connecting to WebSocket.");
     esp_websocket_client_start(this->client);
     while (!esp_websocket_client_is_connected(this->client))
     {
-        delay(250);
+        WatcherController::blinkLED(125, 125, LedPin::WEBSOCKET_PIN);
     }
+    ESP_LOGI(TAG, "WebSocket Client Connected.");
+    WatcherController::setLEDState(LedPin::WEBSOCKET_PIN, LedState::ON);
 }
 
 void VaultSignal::NetworkClient::sendEvents(void)
 {
+    this->connectClient();
+    ESP_LOGI(TAG, "Waiting for events...");
     while (true)
     {
+        ESP_LOGI(TAG, "Event received.");
         // Within the event loop.
         DeviceEvent currentEvent = DeviceEvent();
         BaseType_t receivedEvent = xQueueReceive(this->eventsQueue, &currentEvent, 60);

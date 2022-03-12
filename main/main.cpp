@@ -1,7 +1,9 @@
 #include "Arduino.h"
 #include "WatcherController.hpp"
 #include "NetworkClient.hpp"
+#include "RadioReceiver.hpp"
 #include <thread>
+#include "esp_log.h"
 
 /**
  * @brief Controls the networking.
@@ -12,6 +14,7 @@
  */
 void networkEventLoop(VaultSignal::NetworkClient &client)
 {
+    ESP_LOGI(VaultSignal::TAG, "Starting network thread.");
     client.sendEvents();
 }
 
@@ -20,5 +23,8 @@ extern "C" void app_main()
     initArduino();
     VaultSignal::WatcherController::initialiseWatcher();
     VaultSignal::NetworkClient client("Superbox_Wifi_9538", "DearLordIFinallyHaveInternet");
+    VaultSignal::RadioReceiver receiver;
     std::thread networkThread(networkEventLoop, std::ref(client));
+    receiver.receiveMessages(client);
+    networkThread.join();
 }
