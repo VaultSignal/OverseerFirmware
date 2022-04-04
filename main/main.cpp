@@ -23,7 +23,7 @@ extern "C" void app_main()
     initArduino();
     VaultSignal::WatcherController::initialiseWatcher();
     VaultSignal::NetworkClient client("Superbox_Wifi_9538", "DearLordIFinallyHaveInternet");
-    VaultSignal::RadioReceiver receiver;
+    VaultSignal::RadioReceiver receiver(client);
     std::thread networkThread(networkEventLoop, std::ref(client));
     receiver.receiveMessages(client);
     networkThread.join();

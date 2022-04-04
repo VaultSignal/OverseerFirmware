@@ -9,12 +9,14 @@ namespace VaultSignal
     class RadioReceiver
     {
     private:
+        NetworkClient &client;
         int connectionsReceived;
         std::unique_ptr<DeviceEvent> encodeDeviceEvent(uint8_t *payload);
 
     public:
         void receiveMessages(NetworkClient &client);
-        RadioReceiver();
+        void receiveMessage()
+        RadioReceiver(NetworkClient &client);
         ~RadioReceiver();
     };
 };
