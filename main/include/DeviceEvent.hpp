@@ -1,9 +1,6 @@
 #ifndef DEVICE_PAYLOAD_HPP
 #define DEVICE_PAYLOAD_HPP
 
-#include <stdint.h>
-#include <ctime>
-
 namespace VaultSignal
 {
     /**

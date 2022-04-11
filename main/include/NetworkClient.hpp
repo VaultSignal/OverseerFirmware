@@ -1,6 +1,8 @@
 #ifndef NETWORK_CLIENT_HPP
 #define NETWORK_CLIENT_HPP
 
+#include "Arduino.h"
+#include "WiFi.h"
 #include "DeviceEvent.hpp"
 #include <memory>
 #include "esp_websocket_client.h"

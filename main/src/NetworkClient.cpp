@@ -12,7 +12,8 @@ VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password
     ESP_LOGI(TAG, "Initialising NetworkClient.");
     // Initialise the connection.
     this->eventsQueue = xQueueCreate(NETWORK_EVENT_QUEUE_LIMIT, sizeof(DeviceEvent));
-    WatcherController::initialiseWifi(ssid, password);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED)
     {
         ESP_LOGW(TAG, "Connection Failed...");
         WatcherController::blinkLED(125, 125, LedPin::WIFI_PIN);
