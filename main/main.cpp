@@ -1,8 +1,10 @@
-#include "Arduino.h"
 #include "WatcherController.hpp"
 #include "NetworkClient.hpp"
 #include "RadioReceiver.hpp"
 #include <thread>
+#include <memory>
+#include "nvs_flash.h"
+#include "nvs.h"
 #include "esp_log.h"
 
 /**
@@ -12,19 +14,18 @@
  *  the event queue of the network client.
  * @param client Network client used by the event loop.
  */
-void networkEventLoop(VaultSignal::NetworkClient &client)
+void networkEventLoop(std::shared_ptr<VaultSignal::NetworkClient> client)
 {
     ESP_LOGI(VaultSignal::TAG, "Starting network thread.");
-    client.sendEvents();
+    client->sendEvents();
 }
 
 extern "C" void app_main()
 {
-    initArduino();
+    nvs_flash_init();
     VaultSignal::WatcherController::initialiseWatcher();
-    VaultSignal::NetworkClient client("Superbox_Wifi_9538", "DearLordIFinallyHaveInternet");
+    auto client = std::make_shared<VaultSignal::NetworkClient>("Superbox_Wifi_9538", "DearLordIFinallyHaveInternet");
     VaultSignal::RadioReceiver receiver(client);
-    std::thread networkThread(networkEventLoop, std::ref(client));
-    receiver.receiveMessages(client);
+    std::thread networkThread(networkEventLoop, client);
     networkThread.join();
 }

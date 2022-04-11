@@ -65,7 +65,8 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "*.inc": "cpp"
+    "*.inc": "cpp",
+    "complex": "cpp"
   },
   "idf.flashType": "UART",
   "idf.openOcdConfigs": [
