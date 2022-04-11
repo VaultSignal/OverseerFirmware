@@ -1,12 +1,4 @@
 #include "RadioReceiver.hpp"
-#include "NetworkClient.hpp"
-#include "WatcherController.hpp"
-
-static void IRAM_ATTR gpio_isr_handler(void* arg)
-{
-    uint32_t gpio_num = (uint32_t) arg;
-    xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
-}
 
 void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &client)
 {
@@ -24,14 +16,12 @@ void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &cli
     }
 }
 
-VaultSignal::RadioReceiver::RadioReceiver(VaultSignal::NetworkClient &client)
+VaultSignal::RadioReceiver::RadioReceiver()
 {
     this->connectionsReceived = 0;
-    this->client = client;
 }
 
 VaultSignal::RadioReceiver::~RadioReceiver()
 {
-    gpio_isr_handler_remove(GPIO_INPUT_IO_0);
     this->connectionsReceived = 0;
 }

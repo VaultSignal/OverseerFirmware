@@ -21,12 +21,6 @@ namespace VaultSignal
 
     class WatcherController
     {
-    private:
-        /**
-         * @brief Setup the radio receiver interrupt pins.
-         * 
-         */
-        static void setupRadioReceiverInterrupt(void);
     public:
         /**
          * @brief Blink the built-in led of the device once.
