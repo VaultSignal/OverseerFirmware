@@ -2,6 +2,9 @@
 #include "WatcherController.hpp"
 #include "freertos/FreeRTOS.h"
 #include <cstring>
+#include <string>
+#include <sstream>
+#include <iomanip>
 #include "freertos/task.h"
 
 void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &client)
@@ -21,7 +24,7 @@ void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &cli
             ESP_LOGI(RFTAG, "Message Received");
             WatcherController::setLEDState(LedPin::RADIO_PIN, LedState::ON);
             this->receiver->read(buffer, 28);
-            ESP_LOGI(RFTAG, "%i%i%i%i", buffer[0], buffer[1], buffer[2], buffer[3]);
+            logPayload(buffer, 28);
             uint8_t *payload = (uint8_t *)malloc(sizeof(uint8_t) * 28);
             payload = (uint8_t *)std::memcpy(payload, buffer, 28);
             client.queueForUpload(reinterpret_cast<DeviceEvent *>(payload));
@@ -42,4 +45,17 @@ VaultSignal::RadioReceiver::~RadioReceiver()
 {
     delete this->receiver;
     this->connectionsReceived = 0;
+}
+
+void VaultSignal::RadioReceiver::logPayload(uint8_t *payload, int payloadSize)
+{
+    std::string log;
+    char ch[3];
+    for (int i = 0; i < payloadSize; i++)
+    {
+        snprintf(ch, 3, "%02X", (int)payload[i]);
+        log += ch;
+    }
+    const char *cstr = log.c_str();
+    ESP_LOGI(RFTAG, "%s", cstr);
 }

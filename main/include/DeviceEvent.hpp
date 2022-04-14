@@ -20,7 +20,6 @@ namespace VaultSignal
         uint32_t ldrTwo;
         uint32_t ldrThree;
     };
-
 };
 
 #endif // DEVICE_PAYLOAD_HPP
