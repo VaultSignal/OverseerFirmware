@@ -30,10 +30,11 @@ VaultSignal::NetworkClient::~NetworkClient()
     esp_websocket_client_destroy(this->client);
 }
 
-void VaultSignal::NetworkClient::queueForUpload(const DeviceEvent &event)
+void VaultSignal::NetworkClient::queueForUpload(DeviceEvent *event)
 {
     // Try to queue the event, if the queue fails, the package is 'dropped'.
-    xQueueSend(this->eventsQueue, &event, 0);
+    xQueueSend(this->eventsQueue, event, 0);
+    free(event);
 }
 
 void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
@@ -43,16 +44,14 @@ void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
     static char data[10000];
     int len = sprintf(data, "{\"station_id\": \"%X\","
                             "\"device_id\": \"%i\","
-                            "\"event_id\": %i,"
                             "\"timestamp\": %li,"
                             "\"has_moved\": %i,"
                             "\"has_opened\": %i,"
                             "\"has_light\": %i,"
                             "\"accelerometer_data\": [%f, %f, %f],"
-                            "\"light_sensor_data\": [%f, %f, %f]}",
+                            "\"light_sensor_data\": [%i, %i, %i]}",
                       WatcherController::deviceID,
                       event.deviceID,
-                      event.eventID,
                       currentTime,
                       event.hasMoved,
                       event.hasOpened,
@@ -80,7 +79,6 @@ void VaultSignal::NetworkClient::sendEvents(void)
     ESP_LOGI(TAG, "Waiting for events...");
     while (true)
     {
-        ESP_LOGI(TAG, "Event received.");
         // Within the event loop.
         DeviceEvent currentEvent = DeviceEvent();
         BaseType_t receivedEvent = xQueueReceive(this->eventsQueue, &currentEvent, 60);
@@ -92,6 +90,7 @@ void VaultSignal::NetworkClient::sendEvents(void)
         }
         else
         {
+            ESP_LOGI(TAG, "Event received.");
             this->postToServer(currentEvent);
         }
     }

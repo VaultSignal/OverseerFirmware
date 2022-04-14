@@ -3,14 +3,21 @@
 #include "Arduino.h"
 #include <time.h>
 
+#define RF_SPI_SCLK 18
+#define RF_SPI_MISO 19
+#define RF_SPI_MOSI 23
+
 namespace VaultSignal
 {
-    constexpr const char *TAG = "vault_signal";
+    constexpr const char *TAG = "overseer_network";
+    constexpr const char *RFTAG = "overseer_radio";
+    constexpr const char *SYSTAG = "overseer_system";
 
     typedef enum LedPin : uint8_t
     {
         WIFI_PIN = 33,
         WEBSOCKET_PIN = 32,
+        RADIO_PIN = 25
     } LedPin;
 
     typedef enum LedState : uint8_t

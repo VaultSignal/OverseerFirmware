@@ -1,10 +1,6 @@
 #! /bin/bash
 mkdir components
-mkdir temp
-git clone https://github.com/nopnop2002/esp-idf-mirf temp/esp-idf-mirf
-cp -r temp/esp-idf-mirf/components/mirf components/mirf
-rm -rf temp
-mkdir -p components
+git clone https://github.com/ReDFoX43rus/nRF24L01p-ESP32-Library components/NRF024L01p
 cd components
 git clone https://github.com/espressif/arduino-esp32.git arduino
 cd arduino

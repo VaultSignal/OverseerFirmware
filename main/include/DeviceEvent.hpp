@@ -9,18 +9,16 @@ namespace VaultSignal
      */
     struct DeviceEvent
     {
-        uint16_t deviceID;
-        uint8_t eventID;
-        time_t eventTimestamp;
-        bool hasMoved;
-        bool hasOpened;
-        bool hasLight;
+        uint8_t deviceID;
+        uint8_t hasOpened;
+        uint8_t hasMoved;
+        uint8_t hasLight;
         float xAccel;
         float yAccel;
         float zAccel;
-        float ldrOne;
-        float ldrTwo;
-        float ldrThree;
+        uint32_t ldrOne;
+        uint32_t ldrTwo;
+        uint32_t ldrThree;
     };
 
 };

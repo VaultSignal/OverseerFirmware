@@ -59,7 +59,7 @@ namespace VaultSignal
          *  when the time permits.
          * @param event Event to upload.
          */
-        void queueForUpload(const DeviceEvent &event);
+        void queueForUpload(DeviceEvent *event);
 
         /**
          * @brief Sends device events to the server.
