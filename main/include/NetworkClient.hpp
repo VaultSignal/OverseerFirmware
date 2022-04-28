@@ -11,10 +11,9 @@
  * @brief Maximum number of events that can be queued.
  */
 const int NETWORK_EVENT_QUEUE_LIMIT = 20;
-constexpr const char *HOST = "ws://192.168.1.3:8000/";
+constexpr const char *HOST = "wss://overseer-websocket-simple.herokuapp.com";
 static constexpr esp_websocket_client_config_t WS_CONFIG = {
-    .uri = HOST,
-};
+    .uri = HOST};
 
 namespace VaultSignal
 {
@@ -59,7 +58,7 @@ namespace VaultSignal
          *  when the time permits.
          * @param event Event to upload.
          */
-        void queueForUpload(DeviceEvent *event);
+        void queueForUpload(std::unique_ptr<DeviceEvent> event);
 
         /**
          * @brief Sends device events to the server.

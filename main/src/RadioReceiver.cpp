@@ -27,7 +27,8 @@ void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &cli
             logPayload(buffer, 28);
             uint8_t *payload = (uint8_t *)malloc(sizeof(uint8_t) * 28);
             payload = (uint8_t *)std::memcpy(payload, buffer, 28);
-            client.queueForUpload(reinterpret_cast<DeviceEvent *>(payload));
+            auto event = std::unique_ptr<DeviceEvent>{reinterpret_cast<DeviceEvent *>(payload)};
+            client.queueForUpload(std::move(event));
             WatcherController::setLEDState(LedPin::RADIO_PIN, LedState::OFF);
         }
         vTaskDelay(pdMS_TO_TICKS(250));
