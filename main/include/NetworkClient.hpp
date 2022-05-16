@@ -18,6 +18,13 @@ static constexpr esp_websocket_client_config_t WS_CONFIG = {
 
 namespace VaultSignal
 {
+
+    typedef struct NetworkCredentials
+    {
+        const char *ssid;
+        const char *password;
+    } NetworkCredentials;
+
     class NetworkClient
     {
     private:
@@ -67,6 +74,14 @@ namespace VaultSignal
          * Send the device events to the server.
          */
         void sendEvents(void);
+
+        /**
+         * @brief Create a Wifi Access point to get wifi information.
+         *
+         * @param apName Name of the access point.
+         * @return  the object holding network credentials
+         */
+        static const NetworkCredentials &initializeWifiProvisioning(const char *apName);
     };
 };
 
