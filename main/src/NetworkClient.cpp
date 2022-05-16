@@ -30,11 +30,10 @@ VaultSignal::NetworkClient::~NetworkClient()
     esp_websocket_client_destroy(this->client);
 }
 
-void VaultSignal::NetworkClient::queueForUpload(DeviceEvent *event)
+void VaultSignal::NetworkClient::queueForUpload(std::unique_ptr<DeviceEvent> event)
 {
     // Try to queue the event, if the queue fails, the package is 'dropped'.
-    xQueueSend(this->eventsQueue, event, 0);
-    free(event);
+    xQueueSend(this->eventsQueue, event.get(), 0);
 }
 
 void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
