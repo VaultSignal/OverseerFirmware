@@ -42,3 +42,22 @@ void VaultSignal::WatcherController::initialiseWatcher()
     assert(err == ESP_OK);
     ESP_LOGI(SYSTAG, "Device init complete.");
 }
+
+void VaultSignal::WatcherController::setAllLEDs(VaultSignal::LedState state)
+{
+    static const std::array<LedPin, 3> ledPins = {LedPin::WIFI_PIN, LedPin::WEBSOCKET_PIN, LedPin::RADIO_PIN};
+    for (const auto &pin : ledPins)
+    {
+        setLEDState(pin, state);
+    }
+}
+
+void VaultSignal::WatcherController::unlitAll()
+{
+    setAllLEDs(LedState::OFF);
+}
+
+void VaultSignal::WatcherController::litAll()
+{
+    setAllLEDs(LedState::ON);
+}

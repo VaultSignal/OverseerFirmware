@@ -2,6 +2,7 @@
 #define WATCHER_CONTROLLER_HPP
 #include "Arduino.h"
 #include <time.h>
+#include <array>
 
 #define RF_SPI_SCLK 18
 #define RF_SPI_MISO 19
@@ -29,6 +30,13 @@ namespace VaultSignal
 
     class WatcherController
     {
+    private:
+        /**
+         * @brief Set all LED states.
+         *
+         */
+        static void setAllLEDs(LedState state);
+
     public:
         /**
          * @brief Blink the built-in led of the device once.
@@ -50,6 +58,16 @@ namespace VaultSignal
          * Initialise the watcher device's state.
          */
         static void initialiseWatcher(void);
+        /**
+         * @brief Lit all status LEDs.
+         *
+         */
+        static void litAll(void);
+        /**
+         * @brief Unlit all status LEDs.
+         *
+         */
+        static void unlitAll(void);
         static uint8_t deviceID;
     };
 

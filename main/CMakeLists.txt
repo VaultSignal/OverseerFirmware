@@ -1,6 +1,6 @@
 idf_component_register(
+    EMBED_TXTFILES "getpassword.html"
     SRCS "main.cpp" "src/NetworkClient.cpp" "src/WatcherController.cpp" "src/RadioReceiver.cpp"
     INCLUDE_DIRS "include"
-    COMPONENT_EMBED_FILES "src/getpassword.html"
 )
 

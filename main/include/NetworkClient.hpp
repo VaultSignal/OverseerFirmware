@@ -8,7 +8,8 @@
 #include "esp_websocket_client.h"
 #include <DNSServer.h>
 #include <AsyncTCP.h>
-#include "ESPAsyncWebServer.h"
+#include <WebServer.h>
+#include <string.h>
 /**
  * @brief Maximum number of events that can be queued.
  */
@@ -16,19 +17,22 @@ const int NETWORK_EVENT_QUEUE_LIMIT = 20;
 constexpr const char *HOST = "wss://overseer-websocket-simple.herokuapp.com";
 static constexpr esp_websocket_client_config_t WS_CONFIG = {
     .uri = HOST};
+extern const char index_html[] asm("_binary_getpassword_html_start");
 
 namespace VaultSignal
 {
 
     typedef struct NetworkCredentials
     {
-        const char *ssid;
-        const char *password;
+        std::string ssid;
+        std::string password;
     } NetworkCredentials;
 
     class NetworkClient
     {
     private:
+        // As per https://github.com/espressif/arduino-esp32/blob/master/libraries/DNSServer/examples/CaptivePortal/CaptivePortal.ino
+        static IPAddress apIP;
         QueueHandle_t eventsQueue;
         esp_websocket_client_handle_t client;
         /**
@@ -47,7 +51,7 @@ namespace VaultSignal
         /**
          * Set up the captive request portal pages, return the set up asyncWebServer.
          */
-        AsyncWebServer *setUpCaptivePortal(NetworkCredentials *credentials);
+        static WebServer *setUpCaptivePortal(NetworkCredentials *credentials);
 
     public:
         /**
@@ -86,7 +90,7 @@ namespace VaultSignal
          * @param apName Name of the access point.
          * @return  the object holding network credentials
          */
-        static const NetworkCredentials &initializeWifiProvisioning(const char *apName);
+        static const NetworkCredentials initializeWifiProvisioning(const char *apName);
     };
 };
 

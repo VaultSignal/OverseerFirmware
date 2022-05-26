@@ -3,10 +3,14 @@
 #include "utility.hpp"
 #include "esp_log.h"
 #include "esp_websocket_client.h"
-#include "CaptiveRequestHandler.hpp"
 #include <ctime>
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 #include <cstring>
+#include <cstdlib>
 static const int NO_DATA_TIMEOUT = 10;
+
+IPAddress VaultSignal::NetworkClient::apIP = IPAddress(8, 8, 4, 4);
 
 VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password)
 {
@@ -98,46 +102,59 @@ void VaultSignal::NetworkClient::sendEvents(void)
 }
 
 // This portion is modified from https://iotespresso.com/create-captive-portal-using-esp32/
-AsyncWebServer *setUpCaptivePortal(NetworkCredentials *credentials)
+WebServer *VaultSignal::NetworkClient::setUpCaptivePortal(VaultSignal::NetworkCredentials *credentials)
 {
-    auto *server = new AsyncWebServer(80);
-    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-               {
-      request->send_P(200, "text/html", index_html); 
+    auto *server = new WebServer(80);
+    server->onNotFound([server]()
+                       {
+      server->send(200, "text/html", index_html); 
       Serial.println("Client Connected"); });
-
-    server->on("/get", HTTP_GET, [credentials](AsyncWebServerRequest *request)
+    server->on("/get", [server, credentials]()
                {
   
-      if (request->hasParam("ssid")) {
-        credentials->ssid = request->getParam("ssid")->value();
+      if (server->hasArg("ssid")) {
+          credentials->ssid = server->arg("ssid").c_str();
       }
 
-      if (request->hasParam("password")) {
-        credentials->password = request->getParam("password")->value();
+      if (server->hasArg("password")) {
+          credentials->password = server->arg("password").c_str();
       }
-      request->send(200, "text/html", "The values entered by you have been successfully sent to the device <br><a href=\"/\">Return to Home Page</a>"); });
+      server->send(200, "text/plain", "Credentials accepted."); });
     return server;
 }
 
-static const NetworkCredentials &initializeWifiProvisioning(const char *apName)
+const VaultSignal::NetworkCredentials VaultSignal::NetworkClient::initializeWifiProvisioning(const char *apName)
 {
-    NetworkCredentials credentials("", "");
+    NetworkCredentials credentials = {"", ""};
     esp_log_level_set(APTAG, ESP_LOG_INFO);
-    Wifi.mode(WIFI_AP);
+    WiFi.mode(WIFI_AP);
     WiFi.softAP(apName);
-    ESP_LOGI(APTAG, "Set up softAP mode.");
+    // As per https://github.com/espressif/arduino-esp32/blob/master/libraries/DNSServer/examples/CaptivePortal/CaptivePortal.ino
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    ESP_LOGI(APTAG, "Set up softAP mode, server is at: ");
     auto *server = NetworkClient::setUpCaptivePortal(&credentials);
     ESP_LOGI(APTAG, "Initialised tag");
     DNSServer dnsServer;
     // Redirect all network traffic to the SoftAP IP.
-    dnsServer.start(53, '*', WiFi.softAPIP());
+    dnsServer.start(53, "*", apIP);
     ESP_LOGI(APTAG, "Set up DNS Server.");
-    server.addHandler(new CaptiveRequestHandler());
+    server->begin();
     ESP_LOGI(APTAG, "Server initialised.");
-    while (credentials.ssid[0] == '\0' || credentials == '\0')
+    WatcherController::litAll();
+    // From https://github.com/espressif/esp-idf/issues/1646
+    // We are okay with the CPU spending time here.
+    while (credentials.ssid == "" || credentials.password == "")
     {
         // Loop until we get all credentials
         dnsServer.processNextRequest();
+        server->handleClient();
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
+    ESP_LOGI(APTAG, "SSID is %s", (credentials.ssid.c_str()));
+    WiFi.softAPdisconnect();
+    server->stop();
+    server->close();
+    delete server;
+    WatcherController::unlitAll();
+    return credentials;
 }

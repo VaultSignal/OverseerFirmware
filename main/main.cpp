@@ -22,9 +22,10 @@ extern "C" void app_main()
 {
     initArduino();
     VaultSignal::WatcherController::initialiseWatcher();
-    auto credentials = NetworkClient::initializeWifiProvisioning('VaultSignal Overseer');
-    VaultSignal::NetworkClient client(credentials.ssid, credentials.password);
+    auto credentials = VaultSignal::NetworkClient::initializeWifiProvisioning("VaultSignal Overseer");
+    VaultSignal::NetworkClient client(credentials.ssid.c_str(), credentials.password.c_str());
     std::thread networkThread(networkEventLoop, std::ref(client));
+    VaultSignal::RadioReceiver receiver;
     receiver.receiveMessages(client);
     networkThread.join();
 }
