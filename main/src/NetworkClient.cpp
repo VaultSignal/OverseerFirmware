@@ -3,7 +3,9 @@
 #include "utility.hpp"
 #include "esp_log.h"
 #include "esp_websocket_client.h"
+#include "CaptiveRequestHandler.hpp"
 #include <ctime>
+#include <cstring>
 static const int NO_DATA_TIMEOUT = 10;
 
 VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password)
@@ -95,58 +97,47 @@ void VaultSignal::NetworkClient::sendEvents(void)
     }
 }
 
+// This portion is modified from https://iotespresso.com/create-captive-portal-using-esp32/
+AsyncWebServer *setUpCaptivePortal(NetworkCredentials *credentials)
+{
+    auto *server = new AsyncWebServer(80);
+    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+               {
+      request->send_P(200, "text/html", index_html); 
+      Serial.println("Client Connected"); });
+
+    server->on("/get", HTTP_GET, [credentials](AsyncWebServerRequest *request)
+               {
+  
+      if (request->hasParam("ssid")) {
+        credentials->ssid = request->getParam("ssid")->value();
+      }
+
+      if (request->hasParam("password")) {
+        credentials->password = request->getParam("password")->value();
+      }
+      request->send(200, "text/html", "The values entered by you have been successfully sent to the device <br><a href=\"/\">Return to Home Page</a>"); });
+    return server;
+}
+
 static const NetworkCredentials &initializeWifiProvisioning(const char *apName)
 {
-    WiFi.softAP(apName, 'Cat');
-    WiFiServer passwordServer(80);
-    WiFiClient client = server.available(); // Listen for incoming clients
-
-    // Ported from the tutorial at: https://randomnerdtutorials.com/esp32-access-point-ap-web-server/
-
-    if (client)
-    { // If a new client connects,
-        while (client.connected())
-        { // loop while the client's connected
-            if (client.available())
-            {                           // if there's bytes to read from the client,
-                char c = client.read(); // read a byte, then
-                Serial.write(c);        // print it out the serial monitor
-                header += c;
-                if (c == '\n')
-                { // if the byte is a newline character
-                    // if the current line is blank, you got two newline characters in a row.
-                    // that's the end of the client HTTP request, so send a response:
-                    if (currentLine.length() == 0)
-                    {
-                        // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-                        // and a content-type so the client knows what's coming, then a blank line:
-                        client.println("HTTP/1.1 200 OK");
-                        client.println("Content-type:text/html");
-                        client.println("Connection: close");
-                        client.println();
-
-                        // Display the HTML web page
-                        client.println(payload);
-                        client.println();
-                        // Break out of the while loop
-                        break;
-                    }
-                    else
-                    { // if you got a newline, then clear currentLine
-                        currentLine = "";
-                    }
-                }
-                else if (c != '\r')
-                {                     // if you got anything else but a carriage return character,
-                    currentLine += c; // add it to the end of the currentLine
-                }
-            }
-        }
-        // Clear the header variable
-        header = "";
-        // Close the connection
-        client.stop();
-        Serial.println("Client disconnected.");
-        Serial.println("");
+    NetworkCredentials credentials("", "");
+    esp_log_level_set(APTAG, ESP_LOG_INFO);
+    Wifi.mode(WIFI_AP);
+    WiFi.softAP(apName);
+    ESP_LOGI(APTAG, "Set up softAP mode.");
+    auto *server = NetworkClient::setUpCaptivePortal(&credentials);
+    ESP_LOGI(APTAG, "Initialised tag");
+    DNSServer dnsServer;
+    // Redirect all network traffic to the SoftAP IP.
+    dnsServer.start(53, '*', WiFi.softAPIP());
+    ESP_LOGI(APTAG, "Set up DNS Server.");
+    server.addHandler(new CaptiveRequestHandler());
+    ESP_LOGI(APTAG, "Server initialised.");
+    while (credentials.ssid[0] == '\0' || credentials == '\0')
+    {
+        // Loop until we get all credentials
+        dnsServer.processNextRequest();
     }
 }

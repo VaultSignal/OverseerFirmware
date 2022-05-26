@@ -6,7 +6,9 @@
 #include "DeviceEvent.hpp"
 #include <memory>
 #include "esp_websocket_client.h"
-
+#include <DNSServer.h>
+#include <AsyncTCP.h>
+#include "ESPAsyncWebServer.h"
 /**
  * @brief Maximum number of events that can be queued.
  */
@@ -29,7 +31,6 @@ namespace VaultSignal
     private:
         QueueHandle_t eventsQueue;
         esp_websocket_client_handle_t client;
-
         /**
          * @brief Post a single event to the server.
          *
@@ -42,6 +43,11 @@ namespace VaultSignal
          *
          */
         void connectClient(void);
+
+        /**
+         * Set up the captive request portal pages, return the set up asyncWebServer.
+         */
+        AsyncWebServer *setUpCaptivePortal(NetworkCredentials *credentials);
 
     public:
         /**

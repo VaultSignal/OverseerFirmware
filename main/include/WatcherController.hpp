@@ -11,6 +11,7 @@ namespace VaultSignal
 {
     constexpr const char *TAG = "overseer_network";
     constexpr const char *RFTAG = "overseer_radio";
+    constexpr const char *APTAG = "overseer_softap";
     constexpr const char *SYSTAG = "overseer_system";
 
     typedef enum LedPin : uint8_t
