@@ -7,7 +7,6 @@
 #include <memory>
 #include "esp_websocket_client.h"
 #include <DNSServer.h>
-#include <AsyncTCP.h>
 #include <WebServer.h>
 #include <string.h>
 /**

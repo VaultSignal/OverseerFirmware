@@ -1,0 +1,6 @@
+[submodule "components/arduino"]
+	path = components/arduino
+	url = https://github.com/espressif/arduino-esp32
+[submodule "components/RF24"]
+	path = components/RF24
+	url = https://github.com/VaultSignal/ESP32-RF24
