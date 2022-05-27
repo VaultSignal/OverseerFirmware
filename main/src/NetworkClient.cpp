@@ -7,6 +7,7 @@
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 #include <cstring>
+#include <string>
 #include <cstdlib>
 static const int NO_DATA_TIMEOUT = 10;
 
@@ -18,6 +19,7 @@ VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password
     ESP_LOGI(TAG, "Initialising NetworkClient.");
     // Initialise the connection.
     this->eventsQueue = xQueueCreate(NETWORK_EVENT_QUEUE_LIMIT, sizeof(DeviceEvent));
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -102,12 +104,12 @@ void VaultSignal::NetworkClient::sendEvents(void)
 }
 
 // This portion is modified from https://iotespresso.com/create-captive-portal-using-esp32/
-WebServer *VaultSignal::NetworkClient::setUpCaptivePortal(VaultSignal::NetworkCredentials *credentials)
+WebServer *VaultSignal::NetworkClient::setUpCaptivePortal(VaultSignal::NetworkCredentials *credentials, std::string captivePortal)
 {
     auto *server = new WebServer(80);
-    server->onNotFound([server]()
+    server->onNotFound([server, captivePortal]()
                        {
-      server->send(200, "text/html", index_html); 
+      server->send(200, "text/html", captivePortal.c_str()); 
       Serial.println("Client Connected"); });
     server->on("/get", [server, credentials]()
                {
@@ -123,16 +125,37 @@ WebServer *VaultSignal::NetworkClient::setUpCaptivePortal(VaultSignal::NetworkCr
     return server;
 }
 
+const std::string VaultSignal::NetworkClient::generateCaptivePortalPage()
+{
+    const int numberOfNetworks = WiFi.scanNetworks();
+    ESP_LOGI(APTAG, "%d APs found.", numberOfNetworks);
+    std::string networks("");
+    for (int i = 0; i < numberOfNetworks; i++)
+    {
+        const std::string networkSSID(WiFi.SSID(i).c_str());
+        networks += "<option value=\"" + networkSSID + "\">" + networkSSID + "</option>\n";
+    }
+    ESP_LOGI(APTAG, "%s", networks.c_str());
+    std::string inputForm(index_html);
+    // Find the replace place.
+    const std::string replacePattern("{options}");
+    const int replaceLocation = inputForm.find(replacePattern);
+    // Replace the options.
+    inputForm.replace(replaceLocation, replacePattern.length(), networks);
+    return inputForm;
+}
+
 const VaultSignal::NetworkCredentials VaultSignal::NetworkClient::initializeWifiProvisioning(const char *apName)
 {
     NetworkCredentials credentials = {"", ""};
     esp_log_level_set(APTAG, ESP_LOG_INFO);
-    WiFi.mode(WIFI_AP);
+    WiFi.mode(WIFI_AP_STA);
+    const std::string captivePortal = generateCaptivePortalPage();
     WiFi.softAP(apName);
     // As per https://github.com/espressif/arduino-esp32/blob/master/libraries/DNSServer/examples/CaptivePortal/CaptivePortal.ino
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     ESP_LOGI(APTAG, "Set up softAP mode, server is at: ");
-    auto *server = NetworkClient::setUpCaptivePortal(&credentials);
+    auto *server = NetworkClient::setUpCaptivePortal(&credentials, captivePortal);
     ESP_LOGI(APTAG, "Initialised tag");
     DNSServer dnsServer;
     // Redirect all network traffic to the SoftAP IP.

@@ -51,7 +51,17 @@ namespace VaultSignal
         /**
          * Set up the captive request portal pages, return the set up asyncWebServer.
          */
-        static WebServer *setUpCaptivePortal(NetworkCredentials *credentials);
+        static WebServer *setUpCaptivePortal(NetworkCredentials *credentials, std::string captivePortal);
+
+        /**
+         * @brief Generate the page for captive portal.
+         *
+         * Generate HTML page for the captive portal by scanning for any WiFi
+         * networks.
+         *
+         * @return std::string HTML page of the captive portal.
+         */
+        const static std::string generateCaptivePortalPage();
 
     public:
         /**
