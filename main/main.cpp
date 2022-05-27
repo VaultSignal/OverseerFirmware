@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "WatcherController.hpp"
+#include "OverseerController.hpp"
 #include "NetworkClient.hpp"
 #include "RadioReceiver.hpp"
 #include <thread>
@@ -21,7 +21,7 @@ void networkEventLoop(VaultSignal::NetworkClient &client)
 extern "C" void app_main()
 {
     initArduino();
-    VaultSignal::WatcherController::initialiseWatcher();
+    VaultSignal::OverseerController::initialiseWatcher();
     auto credentials = VaultSignal::NetworkClient::initializeWifiProvisioning("VaultSignal Overseer");
     VaultSignal::NetworkClient client(credentials.ssid.c_str(), credentials.password.c_str());
     std::thread networkThread(networkEventLoop, std::ref(client));

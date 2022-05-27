@@ -46,7 +46,7 @@ namespace VaultSignal
         OFF = LOW
     } LedState;
 
-    class WatcherController
+    class OverseerController
     {
     private:
         /**

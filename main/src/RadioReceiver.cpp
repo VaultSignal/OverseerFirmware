@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "RadioReceiver.hpp"
-#include "WatcherController.hpp"
+#include "OverseerController.hpp"
 #include "freertos/FreeRTOS.h"
 #include <cstring>
 #include <string>
@@ -29,8 +29,8 @@ void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &cli
 {
     this->receiver->begin();
     ESP_LOGI(RFTAG, "Message loop started.");
-    WatcherController::blinkLED(100, 100, LedPin::RADIO_PIN);
-    WatcherController::setLEDState(LedPin::RADIO_PIN, LedState::OFF);
+    OverseerController::blinkLED(100, 100, LedPin::RADIO_PIN);
+    OverseerController::setLEDState(LedPin::RADIO_PIN, LedState::OFF);
     uint8_t buffer[28] = {0};
     this->receiver->openReadingPipe(0, this->deviceAddress);
     this->receiver->setPALevel(RF24_PA_MAX);
@@ -40,14 +40,14 @@ void VaultSignal::RadioReceiver::receiveMessages(VaultSignal::NetworkClient &cli
         if (this->receiver->available())
         {
             ESP_LOGI(RFTAG, "Message Received");
-            WatcherController::setLEDState(LedPin::RADIO_PIN, LedState::ON);
+            OverseerController::setLEDState(LedPin::RADIO_PIN, LedState::ON);
             this->receiver->read(buffer, 28);
             logPayload(buffer, 28);
             uint8_t *payload = (uint8_t *)malloc(sizeof(uint8_t) * 28);
             payload = (uint8_t *)std::memcpy(payload, buffer, 28);
             auto event = std::unique_ptr<DeviceEvent>{reinterpret_cast<DeviceEvent *>(payload)};
             client.queueForUpload(std::move(event));
-            WatcherController::setLEDState(LedPin::RADIO_PIN, LedState::OFF);
+            OverseerController::setLEDState(LedPin::RADIO_PIN, LedState::OFF);
         }
         vTaskDelay(pdMS_TO_TICKS(250));
     }

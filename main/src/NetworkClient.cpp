@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "NetworkClient.hpp"
-#include "WatcherController.hpp"
+#include "OverseerController.hpp"
 #include "esp_log.h"
 #include "esp_websocket_client.h"
 #include <ctime>
@@ -41,10 +41,10 @@ VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password
     while (WiFi.status() != WL_CONNECTED)
     {
         ESP_LOGW(TAG, "Connection Failed...");
-        WatcherController::blinkLED(125, 125, LedPin::WIFI_PIN);
+        OverseerController::blinkLED(125, 125, LedPin::WIFI_PIN);
     }
     ESP_LOGI(TAG, "WiFi Connected.");
-    WatcherController::setLEDState(LedPin::WIFI_PIN, LedState::ON);
+    OverseerController::setLEDState(LedPin::WIFI_PIN, LedState::ON);
     this->client = esp_websocket_client_init(&WS_CONFIG);
     ESP_LOGI(TAG, "Websocket Client is Initialised");
 }
@@ -74,7 +74,7 @@ void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
                             "\"has_light\": %i,"
                             "\"accelerometer_data\": [%f, %f, %f],"
                             "\"light_sensor_data\": [%i, %i, %i]}",
-                      WatcherController::deviceID,
+                      OverseerController::deviceID,
                       event.deviceID,
                       currentTime,
                       event.hasMoved,
@@ -91,10 +91,10 @@ void VaultSignal::NetworkClient::connectClient(void)
     esp_websocket_client_start(this->client);
     while (!esp_websocket_client_is_connected(this->client))
     {
-        WatcherController::blinkLED(125, 125, LedPin::WEBSOCKET_PIN);
+        OverseerController::blinkLED(125, 125, LedPin::WEBSOCKET_PIN);
     }
     ESP_LOGI(TAG, "WebSocket Client Connected.");
-    WatcherController::setLEDState(LedPin::WEBSOCKET_PIN, LedState::ON);
+    OverseerController::setLEDState(LedPin::WEBSOCKET_PIN, LedState::ON);
 }
 
 void VaultSignal::NetworkClient::sendEvents(void)
@@ -180,7 +180,7 @@ const VaultSignal::NetworkCredentials VaultSignal::NetworkClient::initializeWifi
     ESP_LOGI(APTAG, "Set up DNS Server.");
     server->begin();
     ESP_LOGI(APTAG, "Server initialised.");
-    WatcherController::litAll();
+    OverseerController::litAll();
     // From https://github.com/espressif/esp-idf/issues/1646
     // We are okay with the CPU spending time here.
     while (credentials.ssid == "" || credentials.password == "")
@@ -195,6 +195,6 @@ const VaultSignal::NetworkCredentials VaultSignal::NetworkClient::initializeWifi
     server->stop();
     server->close();
     delete server;
-    WatcherController::unlitAll();
+    OverseerController::unlitAll();
     return credentials;
 }

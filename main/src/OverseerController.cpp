@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "WatcherController.hpp"
+#include "OverseerController.hpp"
 #include "Arduino.h"
 #include "esp_mac.h"
 #include "hal/spi_types.h"
 #include "driver/spi_common.h"
 
-uint8_t VaultSignal::WatcherController::deviceID = 0;
+uint8_t VaultSignal::OverseerController::deviceID = 0;
 
-void VaultSignal::WatcherController::blinkLED(time_t secondsOn, time_t secondsOff, LedPin ledPin)
+void VaultSignal::OverseerController::blinkLED(time_t secondsOn, time_t secondsOff, LedPin ledPin)
 {
     digitalWrite(ledPin, LOW);
     delay((uint32_t)secondsOn);
@@ -32,19 +32,19 @@ void VaultSignal::WatcherController::blinkLED(time_t secondsOn, time_t secondsOf
     delay((uint32_t)secondsOff);
 }
 
-void VaultSignal::WatcherController::setLEDState(LedPin ledPin, LedState state)
+void VaultSignal::OverseerController::setLEDState(LedPin ledPin, LedState state)
 {
     digitalWrite(ledPin, state);
 }
 
-void VaultSignal::WatcherController::initialiseWatcher()
+void VaultSignal::OverseerController::initialiseWatcher()
 {
     Serial.begin(115200);
     ESP_LOGI(SYSTAG, "Initialising the pins.");
     pinMode(LedPin::WIFI_PIN, OUTPUT);
     pinMode(LedPin::WEBSOCKET_PIN, OUTPUT);
     pinMode(LedPin::RADIO_PIN, OUTPUT);
-    esp_read_mac(&WatcherController::deviceID, ESP_MAC_WIFI_STA);
+    esp_read_mac(&OverseerController::deviceID, ESP_MAC_WIFI_STA);
     // Initialise the SPI bus.
     // As per https://github.com/ReDFoX43rus/nRF24L01p-ESP32-Library
     ESP_LOGI(SYSTAG, "Initialising the SPI.");
@@ -61,7 +61,7 @@ void VaultSignal::WatcherController::initialiseWatcher()
     ESP_LOGI(SYSTAG, "Device init complete.");
 }
 
-void VaultSignal::WatcherController::setAllLEDs(VaultSignal::LedState state)
+void VaultSignal::OverseerController::setAllLEDs(VaultSignal::LedState state)
 {
     static const std::array<LedPin, 3> ledPins = {LedPin::WIFI_PIN, LedPin::WEBSOCKET_PIN, LedPin::RADIO_PIN};
     for (const auto &pin : ledPins)
@@ -70,12 +70,12 @@ void VaultSignal::WatcherController::setAllLEDs(VaultSignal::LedState state)
     }
 }
 
-void VaultSignal::WatcherController::unlitAll()
+void VaultSignal::OverseerController::unlitAll()
 {
     setAllLEDs(LedState::OFF);
 }
 
-void VaultSignal::WatcherController::litAll()
+void VaultSignal::OverseerController::litAll()
 {
     setAllLEDs(LedState::ON);
 }
