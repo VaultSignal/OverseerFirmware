@@ -18,7 +18,6 @@
  */
 #include "NetworkClient.hpp"
 #include "WatcherController.hpp"
-#include "utility.hpp"
 #include "esp_log.h"
 #include "esp_websocket_client.h"
 #include <ctime>
