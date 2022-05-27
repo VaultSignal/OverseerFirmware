@@ -1,5 +1,6 @@
+<img align="right" width="50" height="50" alt="VaultSignal Logo depicting a padlock with a wifi signal sign in the middle and PCB traces moving radiating outwards from the lock." src="resources/noun-secure-connection-4316643.svg" alt="Resume application project app icon">
+
 # VaultSignal - Overseer
-<img alt="VaultSignal Logo depicting a padlock with a wifi signal sign in the middle and PCB traces moving radiating outwards from the lock." src="resources/noun-secure-connection-4316643.svg" width="75">
 
 This is the firmware for the Overseer device, used by the VaultSignal project to receive data from Dwellers using
 radio transmissions and transmit it to a central server on the internet using websockets.
