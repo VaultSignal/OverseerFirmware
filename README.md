@@ -18,7 +18,7 @@ idf.py menuconfig
 
 After this, you can use the ESP-IDF Toolchain to compile, link and flash your device.
 
-## Normal Working
+## Typical User Flow
 
 1. When the device is initally booted, it will open a WiFi Access point titled "VaultSignal Overseer"
 2. When the user connects to this WiFi Access Point, a login page will pop up.
@@ -39,6 +39,7 @@ any problems that may arise.
 | Lit       | Lit      | Lit      | Awaiting credentials |
 | Unlit     | Blinking | Any      | Connecting to WiFi   |
 | Blinking  | Lit      | Any      | Connecting to server |
+| Lit       | Lit      | Any      | Working              |
 | Any       | Any      | Blinking | Radio message on lit |
 
 ## Schematic
