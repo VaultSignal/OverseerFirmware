@@ -1,4 +1,4 @@
-<img align="right" width="75" height="75" alt="VaultSignal Logo depicting a padlock with a wifi signal sign in the middle and PCB traces moving radiating outwards from the lock." src="resources/noun-secure-connection-4316643.svg" alt="Resume application project app icon">
+<img align="right" width="65" height="65" alt="VaultSignal Logo depicting a padlock with a wifi signal sign in the middle and PCB traces moving radiating outwards from the lock." src="resources/noun-secure-connection-4316643.svg" alt="Resume application project app icon">
 
 # VaultSignal - Overseer
 
