@@ -73,7 +73,7 @@ void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
                             "\"has_opened\": %i,"
                             "\"has_light\": %i,"
                             "\"accelerometer_data\": [%f, %f, %f],"
-                            "\"light_sensor_data\": [%i, %i, %i]}",
+                            "\"light_sensor_data\": [%hi, %hi, %hi]}",
                       OverseerController::deviceID,
                       event.deviceID,
                       currentTime,

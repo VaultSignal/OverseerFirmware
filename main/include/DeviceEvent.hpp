@@ -34,10 +34,17 @@ namespace VaultSignal
         float xAccel;
         float yAccel;
         float zAccel;
-        uint32_t ldrOne;
-        uint32_t ldrTwo;
-        uint32_t ldrThree;
+        int16_t padding1;
+        int16_t ldrOne;
+        int16_t padding2;
+        int16_t ldrTwo;
+        int16_t padding3;
+        int16_t ldrThree;
     };
+
+#define EXPECTED_DEVICE_EVENT_SIZE (28 * sizeof(uint8_t))
+    static_assert(sizeof(DeviceEvent) == EXPECTED_DEVICE_EVENT_SIZE, "Using padding!");
+
 };
 
 #endif // DEVICE_PAYLOAD_HPP
