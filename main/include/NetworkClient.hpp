@@ -31,9 +31,8 @@
  * @brief Maximum number of events that can be queued.
  */
 const int NETWORK_EVENT_QUEUE_LIMIT = 20;
-constexpr const char *HOST = "wss://overseer-websocket-simple.herokuapp.com";
-static constexpr esp_websocket_client_config_t WS_CONFIG = {
-    .uri = HOST};
+constexpr const char *HOST = "https://vault-signal-api.herokuapp.com/";
+
 extern const char index_html[] asm("_binary_getpassword_html_start");
 
 namespace VaultSignal

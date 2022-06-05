@@ -45,6 +45,14 @@ VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password
     }
     ESP_LOGI(TAG, "WiFi Connected.");
     OverseerController::setLEDState(LedPin::WIFI_PIN, LedState::ON);
+    std::string url(HOST);
+    char *token = (char *)malloc(sizeof(char) * 6);
+    std::snprintf(token, 6, "%02X", OverseerController::deviceID);
+    std::string tokenStr(token);
+    free(token);
+    url = url + "?token=" + tokenStr;
+    const esp_websocket_client_config_t WS_CONFIG = {
+        .uri = url.c_str()};
     this->client = esp_websocket_client_init(&WS_CONFIG);
     ESP_LOGI(TAG, "Websocket Client is Initialised");
 }
@@ -66,7 +74,7 @@ void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
     ESP_LOGI(TAG, "Sending event.");
     std::time_t currentTime = std::time(0);
     static char data[10000];
-    int len = sprintf(data, "{\"station_id\": \"%X\","
+    int len = sprintf(data, "{\"station_id\": \"%02X\","
                             "\"device_id\": \"%i\","
                             "\"timestamp\": %li,"
                             "\"has_moved\": %i,"
@@ -159,6 +167,11 @@ const std::string VaultSignal::NetworkClient::generateCaptivePortalPage()
     const int replaceLocation = inputForm.find(replacePattern);
     // Replace the options.
     inputForm.replace(replaceLocation, replacePattern.length(), networks);
+    char *token = (char *)malloc(sizeof(char) * 6);
+    std::snprintf(token, 6, "   %02X", OverseerController::deviceID);
+    std::string tokenStr(token);
+    free(token);
+    inputForm.replace(inputForm.find("VSTKN"), 5, tokenStr);
     return inputForm;
 }
 
