@@ -31,7 +31,7 @@
  * @brief Maximum number of events that can be queued.
  */
 const int NETWORK_EVENT_QUEUE_LIMIT = 20;
-constexpr const char *HOST = "https://vault-signal-api.herokuapp.com/";
+constexpr const char *HOST = "wss://vault-signal-api.herokuapp.com/";
 
 extern const char index_html[] asm("_binary_getpassword_html_start");
 
@@ -50,6 +50,8 @@ namespace VaultSignal
         // As per https://github.com/espressif/arduino-esp32/blob/master/libraries/DNSServer/examples/CaptivePortal/CaptivePortal.ino
         static IPAddress apIP;
         QueueHandle_t eventsQueue;
+        constexpr static const long gmtOffset = 3600;             // Seconds
+        constexpr static const char *ntpServer1 = "pool.ntp.org"; // Used to get time.
         esp_websocket_client_handle_t client;
         /**
          * @brief Post a single event to the server.

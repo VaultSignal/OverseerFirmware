@@ -45,9 +45,10 @@ VaultSignal::NetworkClient::NetworkClient(const char *ssid, const char *password
     }
     ESP_LOGI(TAG, "WiFi Connected.");
     OverseerController::setLEDState(LedPin::WIFI_PIN, LedState::ON);
+    configTime(gmtOffset, 0, ntpServer1);
     std::string url(HOST);
-    char *token = (char *)malloc(sizeof(char) * 6);
-    std::snprintf(token, 6, "%02X", OverseerController::deviceID);
+    char *token = (char *)malloc(sizeof(char) * 9);
+    std::snprintf(token, 9, "AAAAAA%02X", OverseerController::deviceID);
     std::string tokenStr(token);
     free(token);
     url = url + "?token=" + tokenStr;
@@ -74,20 +75,21 @@ void VaultSignal::NetworkClient::postToServer(const DeviceEvent &event)
     ESP_LOGI(TAG, "Sending event.");
     std::time_t currentTime = std::time(0);
     static char data[10000];
-    int len = sprintf(data, "{\"station_id\": \"%02X\","
-                            "\"device_id\": \"%i\","
+    int len = sprintf(data, "{\"event\": \"OVERSEER_MESSAGE\", \"data\":"
+                            "{\"station_id\": \"AAAAAA%02X\","
+                            "\"device_id\": \"%08X\","
                             "\"timestamp\": %li,"
-                            "\"has_moved\": %i,"
-                            "\"has_opened\": %i,"
-                            "\"has_light\": %i,"
+                            "\"is_moving\": %s,"
+                            "\"is_open\": %s,"
+                            "\"has_light\": %s,"
                             "\"accelerometer_data\": [%f, %f, %f],"
-                            "\"light_sensor_data\": [%hi, %hi, %hi]}",
+                            "\"light_sensor_data\": [%hi, %hi, %hi]}}",
                       OverseerController::deviceID,
                       event.deviceID,
                       currentTime,
-                      event.hasMoved,
-                      event.hasOpened,
-                      event.hasLight,
+                      event.hasMoved ? "true" : "false",
+                      event.hasOpened ? "true" : "false",
+                      event.hasLight ? "true" : "false",
                       event.xAccel, event.yAccel, event.zAccel,
                       event.ldrOne, event.ldrTwo, event.ldrThree);
     esp_websocket_client_send_text(this->client, data, len, portMAX_DELAY);
@@ -109,6 +111,7 @@ void VaultSignal::NetworkClient::sendEvents(void)
 {
     this->connectClient();
     ESP_LOGI(TAG, "Waiting for events...");
+    time_t lastPingTime = std::time(0);
     while (true)
     {
         // Within the event loop.
@@ -123,7 +126,19 @@ void VaultSignal::NetworkClient::sendEvents(void)
         else
         {
             ESP_LOGI(TAG, "Event received.");
-            this->postToServer(currentEvent);
+            if (currentEvent.hasLight || currentEvent.hasOpened || currentEvent.hasMoved)
+            {
+                this->postToServer(currentEvent);
+            }
+            else if ((std::time(0) - 10) > lastPingTime)
+            {
+                lastPingTime = std::time(0);
+                this->postToServer(currentEvent);
+            }
+            else
+            {
+                continue;
+            }
         }
     }
 }
@@ -167,11 +182,11 @@ const std::string VaultSignal::NetworkClient::generateCaptivePortalPage()
     const int replaceLocation = inputForm.find(replacePattern);
     // Replace the options.
     inputForm.replace(replaceLocation, replacePattern.length(), networks);
-    char *token = (char *)malloc(sizeof(char) * 6);
-    std::snprintf(token, 6, "   %02X", OverseerController::deviceID);
+    char *token = (char *)malloc(sizeof(char) * 9);
+    std::snprintf(token, 9, "AAAAAA%02X", OverseerController::deviceID);
     std::string tokenStr(token);
     free(token);
-    inputForm.replace(inputForm.find("VSTKN"), 5, tokenStr);
+    inputForm.replace(inputForm.find("{VSOTKN}"), 8, tokenStr);
     return inputForm;
 }
 
